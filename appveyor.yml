@@ -1,0 +1,24 @@
+#---------------------------------#
+#  Build Script                   #
+#---------------------------------#
+
+version: 0.1.{build}
+
+configuration: Release
+
+build_script:
+  - ps: .\build.ps1 -Script build.cake
+
+after_build:
+  - ps: .\build.ps1 -Script build.cake -Target Publish
+
+test: off
+
+notifications:
+- provider: Email
+  to:
+  - marcos.pacheco@titcs.com.br
+  subject: TITcs.SharePoint.Orm Build Status
+  on_build_success: false
+  on_build_failure: true
+  on_build_status_changed: true
