@@ -91,7 +91,7 @@ namespace TITcs.SharePoint.Orm.Mappers
                                 var value = TryGetFieldValue(item, field);
                                 if (value != null)
                                 {
-                                    prop.SetValue(entity, fieldMappers[field.Type].Map(field));
+                                    prop.SetValue(entity, fieldMappers[field.Type].Map(value));
                                 }
                             }
                             else
