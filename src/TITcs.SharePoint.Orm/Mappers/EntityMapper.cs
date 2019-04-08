@@ -75,8 +75,8 @@ namespace TITcs.SharePoint.Orm.Mappers
                     {
                         fieldName = customAttribute.Name;
 
-                            // in case there is a property FileSystemObjectType on the TEntity object
-                            if (string.Compare(fieldName, "FileSystemObjectType", true) == 0)
+                        // in case there is a property FileSystemObjectType on the TEntity object
+                        if (string.Compare(fieldName, "FileSystemObjectType", true) == 0)
                         {
                             if (prop.PropertyType == typeof(string))
                             {
@@ -105,8 +105,8 @@ namespace TITcs.SharePoint.Orm.Mappers
                     }
                     else
                     {
-                            // in case no attribute was found, try use the property name
-                            if (item.Fields.ContainsField(prop.Name))
+                        // in case no attribute was found, try use the property name
+                        if (item.Fields.ContainsField(prop.Name))
                         {
                             var field = item.Fields.GetFieldByInternalName(prop.Name);
                             var value = TryGetFieldValue(item, field);

@@ -1,6 +1,5 @@
 ﻿using Microsoft.SharePoint;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using TITcs.SharePoint.Commons;
@@ -102,7 +101,7 @@ namespace TITcs.SharePoint.Orm.Repositories
         /// </summary>
         /// <param name="criteria">Query criteria to satisfy.</param>
         /// <returns>Collection if the returned items that satify the criteria.</returns>
-        public IEnumerable<TEntity> FindAll(IQuerySpecification criteria)
+        public PagedResult<TEntity> FindAll(IQuerySpecification criteria)
         {
             Guards.GuardAgainstNull(criteria);
 
@@ -129,19 +128,25 @@ namespace TITcs.SharePoint.Orm.Repositories
                         }
                     }
 
+                    // query the list using the original parameters to get the total items that the query would return
                     var originalItems = list.GetItems(spQuery);
-                    var itemsCount = originalItems.Count;
+                    var totalItemsCount = originalItems.Count;
 
-                    spQuery.RowLimit = criteria.RowLimit > itemsCount ? (uint)itemsCount : criteria.RowLimit;
+                    spQuery.RowLimit = criteria.RowLimit > totalItemsCount ? (uint)totalItemsCount : criteria.RowLimit;
 
+                    // now query using the pagination information to return only a subset of the original data
                     if (!string.IsNullOrWhiteSpace(criteria.PagingInfo))
                     {
                         spQuery.ListItemCollectionPosition = new SPListItemCollectionPosition(criteria.PagingInfo);
                     }
 
-                    var results = list.GetItems(spQuery);
+                    var finalResults = list.GetItems(spQuery);
 
-                    return results.Cast<SPListItem>().Select(item => mapper.Map(item));
+                    return new PagedResult<TEntity>()
+                    {
+                        PagingInfo = originalItems?.ListItemCollectionPosition?.PagingInfo,
+                        Results = finalResults.Cast<SPListItem>().Select(item => mapper.Map(item))
+                    };
                 }, "FindAll");
         }
 
@@ -185,7 +190,7 @@ namespace TITcs.SharePoint.Orm.Repositories
             }
             return list;
         }
-        
+
 
         #endregion
 
