@@ -87,6 +87,7 @@
     <Compile Include="Interfaces\ISharePointItem.cs" />
     <Compile Include="Interfaces\ISharePointRepository.cs" />
     <Compile Include="Mappers\BooleanFieldMapper.cs" />
+    <Compile Include="Mappers\ComputedFieldMapper.cs" />
     <Compile Include="Mappers\CounterFieldMapper.cs" />
     <Compile Include="Mappers\DateTimeFieldMapper.cs" />
     <Compile Include="Mappers\EntityMapper.cs" />

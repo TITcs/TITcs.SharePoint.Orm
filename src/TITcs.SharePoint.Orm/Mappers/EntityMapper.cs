@@ -27,7 +27,7 @@ namespace TITcs.SharePoint.Orm.Mappers
             { SPFieldType.Number, new NumberFieldMapper()},
             { SPFieldType.Currency, new NumberFieldMapper()},
             { SPFieldType.URL, new UrlFieldMapper()},
-            { SPFieldType.Computed, new NotImplementedFieldMapper()},
+            { SPFieldType.Computed, new ComputedFieldMapper()},
             { SPFieldType.Threading, new NotImplementedFieldMapper()},
             { SPFieldType.Guid, new GuidFieldMapper()},
             { SPFieldType.MultiChoice, new TextArrayFieldMapper()},
