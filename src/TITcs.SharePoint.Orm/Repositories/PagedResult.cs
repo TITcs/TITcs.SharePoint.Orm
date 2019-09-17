@@ -9,6 +9,7 @@ namespace TITcs.SharePoint.Orm.Repositories
 
         public IEnumerable<TEntity> Results { get; set; } = new List<TEntity>();
         public string PagingInfo { get; set; } = string.Empty;
+        public int Total { get; set; }
 
         #endregion
 

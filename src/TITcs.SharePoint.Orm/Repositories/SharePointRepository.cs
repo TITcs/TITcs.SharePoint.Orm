@@ -70,21 +70,14 @@ namespace TITcs.SharePoint.Orm.Repositories
             {
                 var spQuery = new SPQuery();
 
-                if (!string.IsNullOrWhiteSpace(criteria.ViewXml))
+                if (!string.IsNullOrWhiteSpace(criteria.Caml))
                 {
-                    spQuery.ViewXml = criteria.ViewXml;
+                    spQuery.Query = criteria.Caml;
                 }
-                else
-                {
-                    if (!string.IsNullOrWhiteSpace(criteria.Caml))
-                    {
-                        spQuery.Query = criteria.Caml;
-                    }
 
-                    if (!string.IsNullOrWhiteSpace(criteria.Folder))
-                    {
-                        spQuery.Folder = list.FindFolder(criteria.Folder);
-                    }
+                if (!string.IsNullOrWhiteSpace(criteria.Folder))
+                {
+                    spQuery.Folder = list.FindFolder(criteria.Folder);
                 }
 
                 if (!string.IsNullOrWhiteSpace(criteria.PagingInfo))
@@ -108,46 +101,36 @@ namespace TITcs.SharePoint.Orm.Repositories
             TITcs.SharePoint.Commons.Logging.Logger.Instance.Debug("SharePointRepository.GetAll", "Caml = {0}, PagingInfo = {1}, Folder = {2}, RowLimit = {3}", criteria.Caml, criteria.PagingInfo, criteria.Folder, criteria.RowLimit);
 
             return Call(() =>
+            {
+                var spQuery = new SPQuery();
+
+                if (!string.IsNullOrWhiteSpace(criteria.Caml))
                 {
-                    var spQuery = new SPQuery();
+                    spQuery.Query = criteria.Caml;
+                }
 
-                    if (!string.IsNullOrWhiteSpace(criteria.ViewXml))
-                    {
-                        spQuery.ViewXml = criteria.ViewXml;
-                    }
-                    else
-                    {
-                        if (!string.IsNullOrWhiteSpace(criteria.Caml))
-                        {
-                            spQuery.Query = criteria.Caml;
-                        }
+                if (!string.IsNullOrWhiteSpace(criteria.Folder))
+                {
+                    spQuery.Folder = list.FindFolder(criteria.Folder);
+                }
 
-                        if (!string.IsNullOrWhiteSpace(criteria.Folder))
-                        {
-                            spQuery.Folder = list.FindFolder(criteria.Folder);
-                        }
-                    }
+                // query the list using the original parameters to get the total items that the query would return
+                var originalItems = list.GetItems(spQuery);
+                var totalItemsCount = originalItems.Count;
 
-                    // query the list using the original parameters to get the total items that the query would return
-                    var originalItems = list.GetItems(spQuery);
-                    var totalItemsCount = originalItems.Count;
+                var newSpQuery = GetQuery(criteria);
 
-                    spQuery.RowLimit = criteria.RowLimit > totalItemsCount ? (uint)totalItemsCount : criteria.RowLimit;
+                newSpQuery.RowLimit = criteria.RowLimit > totalItemsCount ? (uint)totalItemsCount : criteria.RowLimit;
 
-                    // now query using the pagination information to return only a subset of the original data
-                    if (!string.IsNullOrWhiteSpace(criteria.PagingInfo))
-                    {
-                        spQuery.ListItemCollectionPosition = new SPListItemCollectionPosition(criteria.PagingInfo);
-                    }
+                var finalResults = list.GetItems(newSpQuery);
 
-                    var finalResults = list.GetItems(spQuery);
-
-                    return new PagedResult<TEntity>()
-                    {
-                        PagingInfo = originalItems?.ListItemCollectionPosition?.PagingInfo,
-                        Results = finalResults.Cast<SPListItem>().Select(item => mapper.Map(item))
-                    };
-                }, "FindAll");
+                return new PagedResult<TEntity>()
+                {
+                    PagingInfo = finalResults?.ListItemCollectionPosition?.PagingInfo,
+                    Results = finalResults.Cast<SPListItem>().Select(item => mapper.Map(item)),
+                    Total = totalItemsCount
+                };
+            }, "FindAll");
         }
 
         #region private
@@ -189,6 +172,42 @@ namespace TITcs.SharePoint.Orm.Repositories
                 throw new MissingListException(listTitle);
             }
             return list;
+        }
+        private SPQuery GetQuery(IQuerySpecification criteria)
+        {
+            var spQuery = new SPQuery();
+
+            if (!string.IsNullOrWhiteSpace(criteria.Caml))
+            {
+                spQuery.Query = criteria.Caml;
+            }
+
+            if (!string.IsNullOrWhiteSpace(criteria.Folder))
+            {
+                spQuery.Folder = list.FindFolder(criteria.Folder);
+            }
+
+            if (!string.IsNullOrWhiteSpace(criteria.ViewFields))
+            {
+                spQuery.ViewFields = criteria.ViewFields;
+            }
+
+            if (!string.IsNullOrWhiteSpace(criteria.Joins))
+            {
+                spQuery.Joins = criteria.Joins;
+            }
+
+            if (!string.IsNullOrWhiteSpace(criteria.ProjectedFields))
+            {
+                spQuery.ProjectedFields = criteria.ProjectedFields;
+            }
+
+            if (!string.IsNullOrWhiteSpace(criteria.PagingInfo))
+            {
+                spQuery.ListItemCollectionPosition = new SPListItemCollectionPosition(criteria.PagingInfo);
+            }
+
+            return spQuery;
         }
 
 

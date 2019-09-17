@@ -8,6 +8,8 @@ namespace TITcs.SharePoint.Orm.Queries
         public string PagingInfo { get; set; }
         public string Folder { get; set; }
         public uint RowLimit { get; set; }
-        public string ViewXml { get; set; }
+        public string ViewFields { get; set; }
+        public string ProjectedFields { get; set; }
+        public string Joins { get; set; }
     }
 }
